@@ -3,8 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Avetics Course Availability - Grid</title>
+  <title>Avetics Course Availability - Horizontal Layout</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'navy': {
+              50: '#f0f4ff',
+              100: '#e0e9ff',
+              200: '#c7d6fe',
+              300: '#a5b8fc',
+              400: '#8b93f8',
+              500: '#7c6df2',
+              600: '#6d4de6',
+              700: '#5e3dcb',
+              800: '#4c32a3',
+              900: '#1e3a8a',
+              950: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
     @keyframes shimmer {
       0% {
@@ -55,17 +78,26 @@
         opacity: 0.5;
       }
     }
+
+    .course-card {
+      transition: all 0.3s ease;
+    }
+
+    .course-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
+    }
   </style>
 </head>
-<body class="bg-gray-50 p-4">
-  <div class="max-w-md mx-auto">
-    <!-- Widget Container -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-        <div class="flex items-center gap-3">
+<body class="bg-gray-50 min-h-screen">
+  <!-- Main Container -->
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+      <div class="bg-gradient-to-r from-navy-800 to-navy-900 rounded-2xl p-8 text-white shadow-xl">
+        <div class="flex items-center justify-center gap-3 mb-4">
           <svg
-            class="w-6 h-6 text-white"
+            class="w-8 h-8 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -77,134 +109,146 @@
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             ></path>
           </svg>
-          <h2 class="text-xl font-bold text-white">Next Available Dates</h2>
+          <h1 class="text-3xl font-bold">Next Available Course Dates</h1>
         </div>
-        <p class="text-blue-100 text-sm mt-1">Real-time course availability</p>
+        <p class="text-navy-200 text-lg">Real-time course availability across all programs</p>
+        <div class="flex items-center justify-center gap-2 mt-4">
+          <div class="w-3 h-3 bg-green-400 rounded-full pulse-dot"></div>
+          <span class="text-sm">Live data updates</span>
+        </div>
       </div>
+    </div>
 
-      <!-- Content -->
-      <div class="p-6">
-        <!-- Loading State -->
-        <div id="loading-state" class="space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="skeleton h-4 w-48 rounded"></div>
-            <div class="skeleton h-6 w-20 rounded-full"></div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="skeleton h-4 w-40 rounded"></div>
-            <div class="skeleton h-6 w-24 rounded-full"></div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="skeleton h-4 w-44 rounded"></div>
-            <div class="skeleton h-6 w-22 rounded-full"></div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="skeleton h-4 w-52 rounded"></div>
-            <div class="skeleton h-6 w-20 rounded-full"></div>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="skeleton h-4 w-46 rounded"></div>
-            <div class="skeleton h-6 w-24 rounded-full"></div>
-          </div>
-        </div>
+    <!-- Loading State -->
+    <div id="loading-state" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="course-card bg-white rounded-xl p-6 shadow-lg">
+        <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
+        <div class="skeleton h-4 w-1/2 rounded mb-3"></div>
+        <div class="skeleton h-8 w-full rounded"></div>
+      </div>
+      <div class="course-card bg-white rounded-xl p-6 shadow-lg">
+        <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
+        <div class="skeleton h-4 w-1/2 rounded mb-3"></div>
+        <div class="skeleton h-8 w-full rounded"></div>
+      </div>
+      <div class="course-card bg-white rounded-xl p-6 shadow-lg">
+        <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
+        <div class="skeleton h-4 w-1/2 rounded mb-3"></div>
+        <div class="skeleton h-8 w-full rounded"></div>
+      </div>
+      <div class="course-card bg-white rounded-xl p-6 shadow-lg">
+        <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
+        <div class="skeleton h-4 w-1/2 rounded mb-3"></div>
+        <div class="skeleton h-8 w-full rounded"></div>
+      </div>
+    </div>
 
-        <!-- Content State - 2x2 grid -->
-        <div
-          id="content-state"
-          class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4"
-        >
-          <!-- Course items inserted here by JS -->
-        </div>
+    <!-- Content State - 4 Column Grid -->
+    <div
+      id="content-state"
+      class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+    >
+      <!-- Course cards will be inserted here by JavaScript -->
+    </div>
 
-        <!-- Error State -->
-        <div id="error-state" class="hidden">
-          <div
-            class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg"
+    <!-- Error State -->
+    <div id="error-state" class="hidden max-w-2xl mx-auto">
+      <div class="bg-white rounded-xl p-8 shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-red-50 border border-red-200 rounded-lg">
+          <svg
+            class="w-8 h-8 text-red-500 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <svg
-              class="w-5 h-5 text-red-500 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            <div>
-              <p class="text-red-800 font-medium">Unable to load course dates</p>
-              <p class="text-red-600 text-sm">Please try again later</p>
-            </div>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <div>
+            <p class="text-red-800 font-semibold text-lg">Unable to load course dates</p>
+            <p class="text-red-600">Please check your connection and try again</p>
           </div>
-          <button
-            onclick="fetchAvailability()"
-            class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          >
-            Retry
-          </button>
         </div>
-
-        <!-- Footer -->
-        <div
-          id="footer"
-          class="hidden mt-6 pt-4 border-t border-gray-200 text-center text-sm text-gray-500"
+        <button
+          onclick="fetchAvailability()"
+          class="mt-6 w-full bg-navy-800 hover:bg-navy-900 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
         >
-          <div class="flex items-center justify-center gap-1 mb-1">
-            <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
-            <span>Live data</span>
-          </div>
-          <span id="last-updated"></span>
-          <p class="text-xs text-gray-400 mt-2">
-            * Course 2a & 2b start on Tuesdays and share availability
-          </p>
+          Retry Loading
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div
+      id="footer"
+      class="hidden mt-8 text-center"
+    >
+      <div class="bg-white rounded-xl p-6 shadow-lg max-w-2xl mx-auto">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+          <span class="text-gray-600 font-medium">Last updated: </span>
+          <span id="last-updated" class="text-navy-800 font-semibold"></span>
         </div>
+        <p class="text-sm text-gray-500 mt-3">
+          * Course 2a & 2b start on Tuesdays and share availability
+        </p>
       </div>
+    </div>
 
-      <!-- Book Now Button -->
-      <div class="px-6 pb-6">
-        <a
-          href="https://booking.avetics.com/v2/#"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-center px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >Book Now</a
-        >
-      </div>
+    <!-- Book Now Section -->
+    <div class="mt-8 text-center">
+      <a
+        href="https://booking.avetics.com/v2/#"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-gradient-to-r from-navy-800 to-navy-900 hover:from-navy-900 hover:to-navy-950 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+      >
+        📅 Book Your Course Now
+      </a>
     </div>
   </div>
 
   <script>
-    // Course mapping with display names
+    // Course mapping with display names and navy color scheme
     const courseMapping = {
       "UAPL Theory 1 day course": {
-        name: "UAPL Theory 1 Day",
+        name: "UAPL Theory",
+        subtitle: "1 Day Course",
         icon: "📚",
-        color: "blue",
+        color: "navy",
+        gradient: "from-navy-600 to-navy-700"
       },
       "Course 2a & 2b": {
-        name: "Course 2a & 2b (Practical)",
+        name: "Course 2a & 2b",
+        subtitle: "Practical Training",
         icon: "🚁",
-        color: "green",
+        color: "emerald",
+        gradient: "from-emerald-600 to-emerald-700"
       },
       "UAPL Assessment Class A 25kg / Proficiency Check": {
-        name: "Assessment Class A 25kg",
+        name: "Assessment A 25kg",
+        subtitle: "Proficiency Check",
         icon: "✅",
         color: "purple",
+        gradient: "from-purple-600 to-purple-700"
       },
       "UAPL Assessment Class A 7kg / Proficiency Check": {
-        name: "Assessment Class A 7kg",
+        name: "Assessment A 7kg",
+        subtitle: "Proficiency Check",
         icon: "✅",
         color: "indigo",
+        gradient: "from-indigo-600 to-indigo-700"
       },
     };
 
     // Color schemes for badges
     const colorSchemes = {
-      blue: "bg-blue-100 text-blue-800 border-blue-200",
-      green: "bg-green-100 text-green-800 border-green-200",
+      navy: "bg-navy-100 text-navy-800 border-navy-200",
+      emerald: "bg-emerald-100 text-emerald-800 border-emerald-200",
       purple: "bg-purple-100 text-purple-800 border-purple-200",
       indigo: "bg-indigo-100 text-indigo-800 border-indigo-200",
       gray: "bg-gray-100 text-gray-600 border-gray-200",
@@ -233,33 +277,41 @@
       return date.toLocaleDateString("en-US", options);
     }
 
-    function createCourseItem(courseName, date, index) {
+    function createCourseCard(courseName, date, index) {
       const course = courseMapping[courseName] || {
         name: courseName,
+        subtitle: "Available",
         icon: "📅",
         color: "gray",
+        gradient: "from-gray-600 to-gray-700"
       };
 
       const formattedDate = formatDate(date);
       const colorClass = colorSchemes[course.color];
 
-      // Added fade-in delay styles
       return `
         <div
-          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors fade-in"
+          class="course-card bg-white rounded-xl shadow-lg overflow-hidden fade-in"
           style="animation-delay: ${index * 0.1}s"
         >
-          <div class="flex items-center gap-3">
-            <span class="text-lg">${course.icon}</span>
-            <div>
-              <h3 class="font-medium text-gray-900 text-sm">${course.name}</h3>
+          <div class="bg-gradient-to-r ${course.gradient} p-4 text-white">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">${course.icon}</span>
+              <div class="text-right">
+                <div class="text-xs opacity-75">Next Available</div>
+              </div>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}"
-              >${formattedDate}</span
-            >
+          <div class="p-6">
+            <h3 class="font-bold text-gray-900 text-lg mb-1">${course.name}</h3>
+            <p class="text-gray-600 text-sm mb-4">${course.subtitle}</p>
+            <div class="flex items-center justify-center">
+              <span
+                class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${colorClass}"
+              >
+                ${formattedDate}
+              </span>
+            </div>
           </div>
         </div>
       `;
@@ -293,11 +345,11 @@
         contentState.classList.remove("hidden");
         footer.classList.remove("hidden");
 
-        // Populate content as grid items
+        // Populate content as grid cards
         let html = "";
         let index = 0;
         for (const [courseName, date] of Object.entries(data)) {
-          html += createCourseItem(courseName, date, index);
+          html += createCourseCard(courseName, date, index);
           index++;
         }
 
@@ -307,7 +359,7 @@
         const now = new Date();
         document.getElementById(
           "last-updated"
-        ).textContent = `Updated ${now.toLocaleTimeString("en-US", {
+        ).textContent = `${now.toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
         })}`;
@@ -333,7 +385,7 @@
       startAutoRefresh();
     });
 
-    // Add click tracking for analytics (optional)
+    // Add click tracking for analytics
     document
       .querySelector('a[href*="booking.avetics.com"]')
       .addEventListener("click", function () {
