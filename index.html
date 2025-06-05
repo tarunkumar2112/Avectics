@@ -1,100 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Avetics Courses Availability</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 2rem;
-    background: #f9f9f9;
-  }
-  #container {
-    max-width: 600px;
-    margin: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-    padding: 1.5rem;
-  }
-  button#uapl-btn {
-    background-color: #0078d7;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.25rem;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-bottom: 1rem;
-  }
-  #availability {
-    margin-top: 1rem;
-  }
-  #availability h3 {
-    margin-bottom: 0.5rem;
-    color: #333;
-  }
-  #availability ul {
-    list-style-type: none;
-    padding-left: 0;
-  }
-  #availability li {
-    background: #e3f2fd;
-    margin-bottom: 0.5rem;
-    padding: 0.75rem 1rem;
-    border-radius: 4px;
-    font-weight: 600;
-  }
-  #loading {
-    font-style: italic;
-    color: #666;
-  }
-  #error {
-    color: #d32f2f;
-    font-weight: 600;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avetics Course Availability</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes shimmer {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: calc(200px + 100%) 0;
+            }
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
 </head>
-<body>
-  <div id="container">
-    <button id="uapl-btn">UAPL Courses</button>
-    <div id="availability">
-      <p id="loading">Loading available dates...</p>
+<body class="bg-gray-50 p-4">
+    <div class="max-w-md mx-auto">
+        <!-- Widget Container -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-white">Next Available Dates</h2>
+                </div>
+                <p class="text-blue-100 text-sm mt-1">Real-time course availability</p>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6">
+                <!-- Loading State -->
+                <div id="loading-state" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="skeleton h-4 w-48 rounded"></div>
+                        <div class="skeleton h-6 w-20 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="skeleton h-4 w-40 rounded"></div>
+                        <div class="skeleton h-6 w-24 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="skeleton h-4 w-44 rounded"></div>
+                        <div class="skeleton h-6 w-22 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="skeleton h-4 w-52 rounded"></div>
+                        <div class="skeleton h-6 w-20 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="skeleton h-4 w-46 rounded"></div>
+                        <div class="skeleton h-6 w-24 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- Content State -->
+                <div id="content-state" class="hidden space-y-4">
+                    <!-- Course items will be populated here -->
+                </div>
+
+                <!-- Error State -->
+                <div id="error-state" class="hidden">
+                    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="text-red-800 font-medium">Unable to load course dates</p>
+                            <p class="text-red-600 text-sm">Please try again later</p>
+                        </div>
+                    </div>
+                    <button onclick="fetchAvailability()" class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Retry
+                    </button>
+                </div>
+
+                <!-- Footer -->
+                <div id="footer" class="hidden mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center gap-1">
+                            <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+                            <span>Live data</span>
+                        </div>
+                        <span id="last-updated"></span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">
+                        * Course 2a & 2b start on Tuesdays and share availability
+                    </p>
+                </div>
+            </div>
+
+            <!-- Book Now Button -->
+            <div class="px-6 pb-6">
+                <a href="https://booking.avetics.com/v2/#" target="_blank" rel="noopener noreferrer" 
+                   class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-center px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    Book Now
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
 
-<script>
-  async function fetchAvailability() {
-    const availabilityDiv = document.getElementById('availability');
-    const loadingEl = document.getElementById('loading');
-    try {
-      const response = await fetch('http://localhost:8888/.netlify/functions/getNextAvailableDates');
-      if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
-      loadingEl.style.display = 'none';
+    <script>
+        // Course mapping with display names
+        const courseMapping = {
+            "UAPL Theory 1 day course": {
+                name: "UAPL Theory 1 Day",
+                icon: "📚",
+                color: "blue"
+            },
+            "Course 2a & 2b": {
+                name: "Course 2a & 2b (Practical)",
+                icon: "🚁",
+                color: "green"
+            },
+            "UAPL Assessment Class A 25kg / Proficiency Check": {
+                name: "Assessment Class A 25kg",
+                icon: "✅",
+                color: "purple"
+            },
+            "UAPL Assessment Class A 7kg / Proficiency Check": {
+                name: "Assessment Class A 7kg",
+                icon: "✅",
+                color: "indigo"
+            }
+        };
 
-      if (Object.keys(data).length === 0) {
-        availabilityDiv.innerHTML = '<p>No available dates found.</p>';
-        return;
-      }
+        // Color schemes for badges
+        const colorSchemes = {
+            blue: "bg-blue-100 text-blue-800 border-blue-200",
+            green: "bg-green-100 text-green-800 border-green-200",
+            purple: "bg-purple-100 text-purple-800 border-purple-200",
+            indigo: "bg-indigo-100 text-indigo-800 border-indigo-200",
+            gray: "bg-gray-100 text-gray-600 border-gray-200"
+        };
 
-      const ul = document.createElement('ul');
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
 
-      for (const [course, date] of Object.entries(data)) {
-        const li = document.createElement('li');
-        li.textContent = `${course}: ${date || 'No dates available'}`;
-        ul.appendChild(li);
-      }
+            // Check if it's today or tomorrow
+            if (date.toDateString() === today.toDateString()) {
+                return "Today";
+            } else if (date.toDateString() === tomorrow.toDateString()) {
+                return "Tomorrow";
+            }
 
-      availabilityDiv.appendChild(ul);
-    } catch (error) {
-      loadingEl.style.display = 'none';
-      availabilityDiv.innerHTML = `<p id="error">Error loading availability: ${error.message}</p>`;
-    }
-  }
+            // Format as day name and date
+            const options = { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
 
-  window.addEventListener('DOMContentLoaded', fetchAvailability);
-</script>
+        function createCourseItem(courseName, date, index) {
+            const course = courseMapping[courseName] || { 
+                name: courseName, 
+                icon: "📅", 
+                color: "gray" 
+            };
+            
+            const formattedDate = formatDate(date);
+            const colorClass = colorSchemes[course.color];
+            
+            return `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors fade-in" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">${course.icon}</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-sm">${course.name}</h3>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}">
+                            ${formattedDate}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function fetchAvailability() {
+            const loadingState = document.getElementById('loading-state');
+            const contentState = document.getElementById('content-state');
+            const errorState = document.getElementById('error-state');
+            const footer = document.getElementById('footer');
+
+            // Show loading state
+            loadingState.classList.remove('hidden');
+            contentState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            footer.classList.add('hidden');
+
+            try {
+                const response = await fetch('http://localhost:8888/.netlify/functions/getNextAvailableDates');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Hide loading and show content
+                loadingState.classList.add('hidden');
+                contentState.classList.remove('hidden');
+                footer.classList.remove('hidden');
+
+                // Populate content
+                let html = '';
+                let index = 0;
+                for (const [courseName, date] of Object.entries(data)) {
+                    html += createCourseItem(courseName, date, index);
+                    index++;
+                }
+                
+                contentState.innerHTML = html;
+
+                // Update last updated time
+                const now = new Date();
+                document.getElementById('last-updated').textContent = 
+                    `Updated ${now.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    })}`;
+
+            } catch (error) {
+                console.error('Error fetching availability:', error);
+                
+                // Show error state
+                loadingState.classList.add('hidden');
+                contentState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                footer.classList.add('hidden');
+            }
+        }
+
+        // Auto-refresh every 5 minutes
+        function startAutoRefresh() {
+            setInterval(fetchAvailability, 5 * 60 * 1000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchAvailability();
+            startAutoRefresh();
+        });
+
+        // Add click tracking for analytics (optional)
+        document.querySelector('a[href*="booking.avetics.com"]').addEventListener('click', function() {
+            console.log('Book Now clicked');
+            // Add your analytics tracking here
+        });
+    </script>
 </body>
 </html>
