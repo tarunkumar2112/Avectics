@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Avetics Courses Availability</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 2rem;
+    background: #f9f9f9;
+  }
+  #container {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    padding: 1.5rem;
+  }
+  button#uapl-btn {
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+  }
+  #availability {
+    margin-top: 1rem;
+  }
+  #availability h3 {
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  #availability ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  #availability li {
+    background: #e3f2fd;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  #loading {
+    font-style: italic;
+    color: #666;
+  }
+  #error {
+    color: #d32f2f;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <button id="uapl-btn">UAPL Courses</button>
+    <div id="availability">
+      <p id="loading">Loading available dates...</p>
+    </div>
+  </div>
+
+<script>
+  async function fetchAvailability() {
+    const availabilityDiv = document.getElementById('availability');
+    const loadingEl = document.getElementById('loading');
+    try {
+      const response = await fetch('http://localhost:8888/.netlify/functions/getNextAvailableDates');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      loadingEl.style.display = 'none';
+
+      if (Object.keys(data).length === 0) {
+        availabilityDiv.innerHTML = '<p>No available dates found.</p>';
+        return;
+      }
+
+      const ul = document.createElement('ul');
+
+      for (const [course, date] of Object.entries(data)) {
+        const li = document.createElement('li');
+        li.textContent = `${course}: ${date || 'No dates available'}`;
+        ul.appendChild(li);
+      }
+
+      availabilityDiv.appendChild(ul);
+    } catch (error) {
+      loadingEl.style.display = 'none';
+      availabilityDiv.innerHTML = `<p id="error">Error loading availability: ${error.message}</p>`;
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', fetchAvailability);
+</script>
+</body>
+</html>
