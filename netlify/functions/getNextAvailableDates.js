@@ -8,7 +8,6 @@ const SERVICE_IDS = {
   assessment7kg: 7,
 };
 
-// Helper: Get token from SimplyBook
 async function getToken(companyLogin, apiKey) {
   const response = await axios.post("https://user-api.simplybook.me/login", {
     jsonrpc: "2.0",
@@ -20,7 +19,6 @@ async function getToken(companyLogin, apiKey) {
   throw new Error("Failed to get token");
 }
 
-// Helper: Get available time intervals for a service/unit
 async function getAvailableIntervals(token, companyLogin, serviceId, unitId, dateFrom, dateTo) {
   const response = await axios.post(
     "https://user-api.simplybook.me/",
@@ -44,11 +42,14 @@ async function getAvailableIntervals(token, companyLogin, serviceId, unitId, dat
       },
     }
   );
-  if (response.data && response.data.result) return response.data.result;
+  if (response.data && response.data.result) {
+    console.log(`Intervals for service ${serviceId}, unit ${unitId}:`, JSON.stringify(response.data.result, null, 2));
+    return response.data.result;
+  }
+  console.warn(`No intervals returned for service ${serviceId}, unit ${unitId}`);
   return null;
 }
 
-// Helper: Get units (providers) for a service
 async function getUnits(token, companyLogin) {
   const response = await axios.post(
     "https://user-api.simplybook.me/",
@@ -70,7 +71,6 @@ async function getUnits(token, companyLogin) {
   throw new Error("Failed to get units");
 }
 
-// Updated: Only return dates with actual available slots
 function findEarliestDate(intervals) {
   if (!intervals) return null;
   const validDates = Object.entries(intervals)
@@ -80,7 +80,6 @@ function findEarliestDate(intervals) {
   return validDates.length > 0 ? validDates[0] : null;
 }
 
-// Updated: Only return Tuesdays with available slots
 function findEarliestTuesday(intervals) {
   if (!intervals) return null;
   const tuesdayDates = Object.entries(intervals)
@@ -114,30 +113,27 @@ exports.handler = async function (event, context) {
     console.log("Token acquired:", token);
 
     const unitsObj = await getUnits(token, companyLogin);
-    console.log("Units fetched:", unitsObj);
-
     const units = Object.values(unitsObj);
+    console.log("Units fetched:", units.map(u => ({ id: u.id, name: u.name, services: u.services })));
 
     if (!units || units.length === 0) {
       return {
         statusCode: 500,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({ error: "No units found" }),
       };
     }
 
     const today = new Date();
     const dateFrom = today.toISOString().slice(0, 10);
-    const dateTo = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
+    const dateTo = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10);
 
     async function getNextAvailableForService(serviceId) {
       for (const unit of units) {
         if (!unit.services || !unit.services.includes(serviceId)) continue;
-
+        console.log(`Checking service ${serviceId} in unit ${unit.id}...`);
         try {
           const intervals = await getAvailableIntervals(
             token,
@@ -168,6 +164,7 @@ exports.handler = async function (event, context) {
         for (const serviceId of [SERVICE_IDS.course2a, SERVICE_IDS.course2b]) {
           if (!unit.services.includes(serviceId)) continue;
 
+          console.log(`Checking Course 2 (ID ${serviceId}) in unit ${unit.id}`);
           try {
             const intervals = await getAvailableIntervals(
               token,
@@ -192,8 +189,8 @@ exports.handler = async function (event, context) {
     const results = {};
     results["UAPL Theory 1 day course"] = await getNextAvailableForService(SERVICE_IDS.theory);
     results["Course 2a & 2b"] = await getNextAvailableForCourse2();
-    results["UAPL Assessment Class A 25kg / Proficiency Check"] = await getNextAvailableForService(3);
-    results["UAPL Assessment Class A 7kg / Proficiency Check"] = await getNextAvailableForService(2);
+    results["UAPL Assessment Class A 25kg / Proficiency Check"] = await getNextAvailableForService(SERVICE_IDS.assessment25kg);
+    results["UAPL Assessment Class A 7kg / Proficiency Check"] = await getNextAvailableForService(SERVICE_IDS.assessment7kg);
 
     return {
       statusCode: 200,
