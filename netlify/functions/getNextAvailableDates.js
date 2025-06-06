@@ -5,7 +5,7 @@ const SERVICE_IDS = {
   course2a: 5,
   course2b: 5,
   assessment25kg: 7,
-  assessment7kg: 2,
+  assessment7kg: 7,
 };
 
 // Helper: Get token from SimplyBook
