@@ -1,68 +1,65 @@
-// File: functions/getAvailableSlots.js
 const axios = require('axios');
 
-const targetServices = [
-  'UAPL Theory 1 day course',
-  'Course 2a: 4 Days Beginner Practical Lesson (Rotorcraft ≤ 7kg)',
-  'Course 2b: 4 Days Beginner Practical Lesson (Rotorcraft ≤ 25kg)',
-  'UAPL Assessment Class A 25kg / Proficiency Check',
-  'UAPL Assessment Class A 7kg / Proficiency Check'
-];
+let cachedToken = null;
+let tokenExpiry = null;
 
-async function getAuthToken() {
-  const tokenResp = await axios.get(`${process.env.FURL}/.netlify/functions/getToken`);
-  return tokenResp.data.token;
-}
+exports.handler = async function (event) {
+  const { service_id, provider_id, date } = event.queryStringParameters;
 
-exports.handler = async function () {
-  const from = new Date().toISOString().split('T')[0];
-  const to = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  if (!service_id || !provider_id) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing service_id or provider_id" })
+    };
+  }
+
+  const SIMPLYBOOK_COMPANY = process.env.SIMPLYBOOK_COMPANY;
+  const SIMPLYBOOK_LOGIN = process.env.SIMPLYBOOK_LOGIN;
+  const SIMPLYBOOK_PASSWORD = process.env.SIMPLYBOOK_PASSWORD;
 
   try {
-    const token = await getAuthToken();
-    const headers = {
-      'Content-Type': 'application/json',
-      'X-Company-Login': process.env.SIMPLYBOOK_COMPANY,
-      'X-Token': token
-    };
-
-    // Fetch all services
-    const serviceRes = await axios.get('https://user-api-v2.simplybook.me/admin/services?per_page=100', { headers });
-    const allServices = serviceRes.data.data;
-
-    const matched = allServices.filter(svc =>
-      targetServices.some(name => svc.name.trim().startsWith(name.trim()))
-    );
-
-    const results = await Promise.all(
-      matched.map(async (svc) => {
-        const providerId = svc.providers[0];
-        const serviceId = svc.id;
-        const name = svc.name;
-
-        const url = `https://user-api-v2.simplybook.me/admin/bookings/available-slots?provider_id=${providerId}&service_id=${serviceId}&from=${from}&to=${to}`;
-        const res = await axios.get(url, { headers });
-
-        let availableDates = Object.keys(res.data.available || {});
-
-        if (name.includes('Course 2a') || name.includes('Course 2b')) {
-          // Only include Tuesday slots
-          availableDates = availableDates.filter(date => new Date(date).getDay() === 2);
+    // Step 1: Reuse token if valid
+    if (!cachedToken || !tokenExpiry || Date.now() >= tokenExpiry) {
+      const authResponse = await axios.post("https://user-api-v2.simplybook.me/admin/auth", {
+        company: SIMPLYBOOK_COMPANY,
+        login: SIMPLYBOOK_LOGIN,
+        password: SIMPLYBOOK_PASSWORD
+      }, {
+        headers: {
+          "Content-Type": "application/json"
         }
+      });
 
-        return {
-          service: name,
-          next_available: availableDates.length > 0 ? availableDates[0] : 'No slots available'
-        };
-      })
-    );
+      cachedToken = authResponse.data.token;
+      tokenExpiry = new Date(authResponse.data.expires).getTime() - 5 * 60 * 1000; // 5 mins buffer
+    }
+
+    // Step 2: Fetch next available slot
+    const today = new Date().toISOString().split('T')[0];
+
+    const slotResponse = await axios.get("https://user-api-v2.simplybook.me/admin/schedule/first-available-slot", {
+      params: {
+        service_id,
+        provider_id,
+        date: date || today
+      },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Company-Login": SIMPLYBOOK_COMPANY,
+        "X-Token": cachedToken
+      }
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify(results)
+      body: JSON.stringify({
+        service_id,
+        provider_id,
+        next_available: slotResponse.data?.start_date_time || null
+      })
     };
+
   } catch (err) {
-    console.error('Error:', err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message })

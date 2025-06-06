@@ -1,50 +1,40 @@
-const axios = require("axios");
+const axios = require('axios');
 
-exports.handler = async function (event, context) {
-  const companyLogin = process.env.SIMPLYBOOK_COMPANY_LOGIN;
+exports.handler = async function () {
+  const SIMPLYBOOK_COMPANY = process.env.SIMPLYBOOK_COMPANY;
+  const SIMPLYBOOK_LOGIN = process.env.SIMPLYBOOK_LOGIN;
+  const SIMPLYBOOK_PASSWORD = process.env.SIMPLYBOOK_PASSWORD;
 
   try {
-    // Step 1: Get token
-    const loginResponse = await axios.post("https://user-api.simplybook.me/login", {
-      jsonrpc: "2.0",
-      method: "getToken",
-      params: {
-        company: companyLogin,
-        api_key: process.env.SIMPLYBOOK_API_KEY
-      },
-      id: 1
+    // Get token
+    const authRes = await axios.post("https://user-api-v2.simplybook.me/admin/auth", {
+      company: SIMPLYBOOK_COMPANY,
+      login: SIMPLYBOOK_LOGIN,
+      password: SIMPLYBOOK_PASSWORD
+    }, {
+      headers: { "Content-Type": "application/json" }
     });
 
-    const token = loginResponse.data?.result;
-    if (!token) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({ error: "Login failed, no token received." }),
-      };
-    }
+    const token = authRes.data.token;
 
-    // Step 2: Call getServiceList
-    const serviceResponse = await axios.post("https://user-api.simplybook.me/", {
-      jsonrpc: "2.0",
-      method: "getServiceList",
-      params: {},
-      id: 1
-    }, {
+    // Get services
+    const servicesRes = await axios.get("https://user-api-v2.simplybook.me/admin/services", {
       headers: {
-        "X-Company-Login": companyLogin,
-        "X-Token": token,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Company-Login": SIMPLYBOOK_COMPANY,
+        "X-Token": token
       }
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify(serviceResponse.data),
+      body: JSON.stringify({ services: servicesRes.data })
     };
+
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
+      body: JSON.stringify({ error: error.message })
     };
   }
 };

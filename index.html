@@ -30,59 +30,30 @@
   </script>
   <style>
     @keyframes shimmer {
-      0% {
-        background-position: -200px 0;
-      }
-      100% {
-        background-position: calc(200px + 100%) 0;
-      }
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
     }
-
     .skeleton {
-      background: linear-gradient(
-        90deg,
-        #f0f0f0 25%,
-        #e0e0e0 50%,
-        #f0f0f0 75%
-      );
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200px 100%;
       animation: shimmer 1.5s infinite;
     }
-
     .fade-in {
       animation: fadeIn 0.5s ease-in forwards;
       opacity: 0;
     }
-
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .pulse-dot {
-      animation: pulse 2s infinite;
-    }
-
+    .pulse-dot { animation: pulse 2s infinite; }
     @keyframes pulse {
-      0%,
-      100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
-
     .course-card {
       transition: all 0.3s ease;
     }
-
     .course-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
@@ -90,24 +61,14 @@
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <!-- Main Container -->
   <div class="container mx-auto px-4 py-8">
-    <!-- Header Section -->
     <div class="text-center mb-8">
       <div class="bg-gradient-to-r from-navy-800 to-navy-900 rounded-2xl p-8 text-white shadow-xl">
         <div class="flex items-center justify-center gap-3 mb-4">
-          <svg
-            class="w-8 h-8 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            ></path>
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+            </path>
           </svg>
           <h1 class="text-3xl font-bold">Next Available Course Dates</h1>
         </div>
@@ -119,7 +80,7 @@
       </div>
     </div>
 
-    <!-- Loading State -->
+    <!-- Loading -->
     <div id="loading-state" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <div class="course-card bg-white rounded-xl p-6 shadow-lg">
         <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
@@ -143,50 +104,30 @@
       </div>
     </div>
 
-    <!-- Content State - 4 Column Grid -->
-    <div
-      id="content-state"
-      class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-    >
-      <!-- Course cards will be inserted here by JavaScript -->
-    </div>
+    <!-- Course Cards -->
+    <div id="content-state" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
 
-    <!-- Error State -->
+    <!-- Error -->
     <div id="error-state" class="hidden max-w-2xl mx-auto">
       <div class="bg-white rounded-xl p-8 shadow-lg">
         <div class="flex items-center gap-4 p-6 bg-red-50 border border-red-200 rounded-lg">
-          <svg
-            class="w-8 h-8 text-red-500 flex-shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <div>
             <p class="text-red-800 font-semibold text-lg">Unable to load course dates</p>
             <p class="text-red-600">Please check your connection and try again</p>
           </div>
         </div>
-        <button
-          onclick="fetchAvailability()"
-          class="mt-6 w-full bg-navy-800 hover:bg-navy-900 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
-        >
+        <button onclick="fetchAvailability()" class="mt-6 w-full bg-navy-800 hover:bg-navy-900 text-white px-6 py-3 rounded-lg font-semibold shadow-lg">
           Retry Loading
         </button>
       </div>
     </div>
 
-    <!-- Footer Info -->
-    <div
-      id="footer"
-      class="hidden mt-8 text-center"
-    >
+    <!-- Footer -->
+    <div id="footer" class="hidden mt-8 text-center">
       <div class="bg-white rounded-xl p-6 shadow-lg max-w-2xl mx-auto">
         <div class="flex items-center justify-center gap-2 mb-2">
           <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
@@ -199,21 +140,16 @@
       </div>
     </div>
 
-    <!-- Book Now Section -->
+    <!-- Book Now -->
     <div class="mt-8 text-center">
-      <a
-        href="https://booking.avetics.com/v2/#"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-block bg-gradient-to-r from-navy-800 to-navy-900 hover:from-navy-900 hover:to-navy-950 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-      >
+      <a href="https://booking.avetics.com/v2/#" target="_blank"
+        class="inline-block bg-gradient-to-r from-navy-800 to-navy-900 hover:from-navy-900 hover:to-navy-950 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl">
         📅 Book Your Course Now
       </a>
     </div>
   </div>
 
   <script>
-    // Course mapping with display names and navy color scheme
     const courseMapping = {
       "UAPL Theory 1 day course": {
         name: "UAPL Theory",
@@ -222,8 +158,15 @@
         color: "navy",
         gradient: "from-navy-600 to-navy-700"
       },
-      "Course 2a & 2b": {
-        name: "Course 2a & 2b",
+      "Course 2a: 4 Days Beginner Practical Lesson (Rotorcraft ≤ 7kg)": {
+        name: "Course 2a",
+        subtitle: "Practical Training",
+        icon: "🚁",
+        color: "emerald",
+        gradient: "from-emerald-600 to-emerald-700"
+      },
+      "Course 2b: 4 Days Beginner Practical Lesson (Rotorcraft ≤ 25kg)": {
+        name: "Course 2b",
         subtitle: "Practical Training",
         icon: "🚁",
         color: "emerald",
@@ -245,7 +188,6 @@
       },
     };
 
-    // Color schemes for badges
     const colorSchemes = {
       navy: "bg-navy-100 text-navy-800 border-navy-200",
       emerald: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -256,24 +198,7 @@
 
     function formatDate(dateString) {
       const date = new Date(dateString);
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-
-      // Check if it's today or tomorrow
-      if (date.toDateString() === today.toDateString()) {
-        return "Today";
-      } else if (date.toDateString() === tomorrow.toDateString()) {
-        return "Tomorrow";
-      }
-
-      // Format as day name and date
-      const options = {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
-      };
+      const options = { weekday: "short", month: "short", day: "numeric" };
       return date.toLocaleDateString("en-US", options);
     }
 
@@ -285,36 +210,27 @@
         color: "gray",
         gradient: "from-gray-600 to-gray-700"
       };
-
-      const formattedDate = formatDate(date);
       const colorClass = colorSchemes[course.color];
+      const formattedDate = formatDate(date);
 
       return `
-        <div
-          class="course-card bg-white rounded-xl shadow-lg overflow-hidden fade-in"
-          style="animation-delay: ${index * 0.1}s"
-        >
+        <div class="course-card bg-white rounded-xl shadow-lg overflow-hidden fade-in" style="animation-delay: ${index * 0.1}s">
           <div class="bg-gradient-to-r ${course.gradient} p-4 text-white">
             <div class="flex items-center justify-between">
               <span class="text-2xl">${course.icon}</span>
-              <div class="text-right">
-                <div class="text-xs opacity-75">Next Available</div>
-              </div>
+              <div class="text-xs opacity-75 text-right">Next Available</div>
             </div>
           </div>
           <div class="p-6">
             <h3 class="font-bold text-gray-900 text-lg mb-1">${course.name}</h3>
             <p class="text-gray-600 text-sm mb-4">${course.subtitle}</p>
             <div class="flex items-center justify-center">
-              <span
-                class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${colorClass}"
-              >
+              <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${colorClass}">
                 ${formattedDate}
               </span>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     async function fetchAvailability() {
@@ -323,75 +239,47 @@
       const errorState = document.getElementById("error-state");
       const footer = document.getElementById("footer");
 
-      // Show loading state
       loadingState.classList.remove("hidden");
       contentState.classList.add("hidden");
       errorState.classList.add("hidden");
       footer.classList.add("hidden");
 
       try {
-        const response = await fetch(
-          "https://avectics.netlify.app/.netlify/functions/getNextAvailableDates"
-        );
+        const response = await fetch("http://localhost:8888/.netlify/functions/getAvailability");
+        if (!response.ok) throw new Error("Fetch failed");
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const json = await response.json();
+        const { data, lastUpdated } = json;
 
-        const data = await response.json();
+        let html = "";
+        let index = 0;
+        data.forEach(course => {
+          if (course.hasAvailability && course.nextAvailableDates.length > 0) {
+            const firstDate = course.nextAvailableDates[0].date;
+            html += createCourseCard(course.serviceName, firstDate, index);
+            index++;
+          }
+        });
 
-        // Hide loading and show content
+        contentState.innerHTML = html;
         loadingState.classList.add("hidden");
         contentState.classList.remove("hidden");
         footer.classList.remove("hidden");
 
-        // Populate content as grid cards
-        let html = "";
-        let index = 0;
-        for (const [courseName, date] of Object.entries(data)) {
-          html += createCourseCard(courseName, date, index);
-          index++;
-        }
+        document.getElementById("last-updated").textContent =
+          new Date(lastUpdated).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
-        contentState.innerHTML = html;
-
-        // Update last updated time
-        const now = new Date();
-        document.getElementById(
-          "last-updated"
-        ).textContent = `${now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}`;
       } catch (error) {
-        console.error("Error fetching availability:", error);
-
-        // Show error state
+        console.error("Error fetching:", error);
         loadingState.classList.add("hidden");
-        contentState.classList.add("hidden");
         errorState.classList.remove("hidden");
-        footer.classList.add("hidden");
       }
     }
 
-    // Auto-refresh every 5 minutes
-    function startAutoRefresh() {
-      setInterval(fetchAvailability, 5 * 60 * 1000);
-    }
-
-    // Initialize
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", () => {
       fetchAvailability();
-      startAutoRefresh();
+      setInterval(fetchAvailability, 5 * 60 * 1000);
     });
-
-    // Add click tracking for analytics
-    document
-      .querySelector('a[href*="booking.avetics.com"]')
-      .addEventListener("click", function () {
-        console.log("Book Now clicked");
-        // Add your analytics tracking here
-      });
   </script>
 </body>
 </html>
