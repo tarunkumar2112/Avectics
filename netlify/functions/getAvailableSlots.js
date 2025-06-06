@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 async function getAuthToken() {
-  const tokenResp = await axios.get(`${process.env.URL}/.netlify/functions/getToken`);
+const tokenResp = await axios.get(`${process.env.FURL}/.netlify/functions/getToken`);
   return tokenResp.data.token;
 }
 
