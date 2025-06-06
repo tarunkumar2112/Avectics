@@ -1,11 +1,11 @@
 const axios = require("axios");
 
 const SERVICE_IDS = {
-  theory: 6,           // UAPL Theory 1 day course id
+  theory: 6,
   course2a: 5,
-  course2b: 5,         // Both 2a & 2b under same unit 5
-  assessment25kg: 7,   // Unit 7 has services 3 and 2 (assessment classes)
-  assessment7kg: 7     // Same unit for both assessments
+  course2b: 5,
+  assessment25kg: 7,
+  assessment7kg: 2,
 };
 
 // Helper: Get token from SimplyBook
@@ -70,20 +70,26 @@ async function getUnits(token, companyLogin) {
   throw new Error("Failed to get units");
 }
 
-// Find earliest available date from the intervals object
+// Updated: Only return dates with actual available slots
 function findEarliestDate(intervals) {
   if (!intervals) return null;
-  const dates = Object.keys(intervals).sort();
-  return dates.length > 0 ? dates[0] : null;
+  const validDates = Object.entries(intervals)
+    .filter(([_, slots]) => Array.isArray(slots) && slots.length > 0)
+    .map(([date]) => date)
+    .sort();
+  return validDates.length > 0 ? validDates[0] : null;
 }
 
-// Find earliest Tuesday date from intervals
+// Updated: Only return Tuesdays with available slots
 function findEarliestTuesday(intervals) {
   if (!intervals) return null;
-  const tuesdayDates = Object.keys(intervals).filter(date => {
-    const day = new Date(date).getDay();
-    return day === 2; // Tuesday
-  }).sort();
+  const tuesdayDates = Object.entries(intervals)
+    .filter(([date, slots]) => {
+      const day = new Date(date).getDay();
+      return day === 2 && Array.isArray(slots) && slots.length > 0;
+    })
+    .map(([date]) => date)
+    .sort();
   return tuesdayDates.length > 0 ? tuesdayDates[0] : null;
 }
 
@@ -91,7 +97,6 @@ exports.handler = async function (event, context) {
   const companyLogin = process.env.SIMPLYBOOK_COMPANY_LOGIN;
   const apiKey = process.env.SIMPLYBOOK_API_KEY;
 
-  // Handle CORS preflight OPTIONS request
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
@@ -111,7 +116,6 @@ exports.handler = async function (event, context) {
     const unitsObj = await getUnits(token, companyLogin);
     console.log("Units fetched:", unitsObj);
 
-    // Convert units object to array for iteration
     const units = Object.values(unitsObj);
 
     if (!units || units.length === 0) {
@@ -124,17 +128,14 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Define date range: today to 2 weeks later
     const today = new Date();
     const dateFrom = today.toISOString().slice(0, 10);
-    const dateTo = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000)
+    const dateTo = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10);
 
-    // Function to get earliest availability for a single service checking all units
     async function getNextAvailableForService(serviceId) {
       for (const unit of units) {
-        // Check if the unit offers this service
         if (!unit.services || !unit.services.includes(serviceId)) continue;
 
         try {
@@ -155,7 +156,6 @@ exports.handler = async function (event, context) {
       return null;
     }
 
-    // For Course 2a & 2b combined
     async function getNextAvailableForCourse2() {
       const availableDates = [];
 
@@ -184,22 +184,21 @@ exports.handler = async function (event, context) {
           }
         }
       }
+
       if (availableDates.length === 0) return null;
       return availableDates.sort()[0];
     }
 
-    // Collect results
     const results = {};
-
     results["UAPL Theory 1 day course"] = await getNextAvailableForService(SERVICE_IDS.theory);
     results["Course 2a & 2b"] = await getNextAvailableForCourse2();
-    results["UAPL Assessment Class A 25kg / Proficiency Check"] = await getNextAvailableForService(3); // service 3 for 25kg
-    results["UAPL Assessment Class A 7kg / Proficiency Check"] = await getNextAvailableForService(2);  // service 2 for 7kg
+    results["UAPL Assessment Class A 25kg / Proficiency Check"] = await getNextAvailableForService(3);
+    results["UAPL Assessment Class A 7kg / Proficiency Check"] = await getNextAvailableForService(2);
 
     return {
       statusCode: 200,
       headers: {
-        "Access-Control-Allow-Origin": "*",   // CORS header here
+        "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(results),
@@ -209,7 +208,7 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 500,
       headers: {
-        "Access-Control-Allow-Origin": "*",   // CORS header here on error
+        "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ error: error.message }),
